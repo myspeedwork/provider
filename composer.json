@@ -1,0 +1,23 @@
+{
+    "name": "speedwork/provider",
+    "type": "library",
+    "description": "Speedwork providers",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "sankar",
+            "email": "sankar.suda@gmail.com"
+        }
+    ],
+    "require": {
+        "php" : ">=5.4",
+        "speedwork/core" : "dev-master",
+        "speedwork/database" : "dev-master",
+        "speedwork/view" : "dev-master",
+        "speedwork/config" : "dev-master"
+    },
+    "autoload" : {
+        "psr-4": { "Speedwork\\Provider\\": "src" }
+    },
+    "minimum-stability": "dev"
+}

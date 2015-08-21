@@ -1,0 +1,80 @@
+<?php
+
+namespace Speedwork\Core\Provider;
+
+use Silex\Provider\Session\SessionListener;
+use Silex\Provider\Session\TestSessionListener;
+use Speedwork\Core\Container;
+use Speedwork\Core\ServiceProvider;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\Handler\NativeFileSessionHandler;
+use Symfony\Component\HttpFoundation\Session\Storage\MockFileSessionStorage;
+use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
+
+/**
+ * Symfony HttpFoundation component Provider for sessions.
+ *
+ * @author Fabien Potencier <fabien@symfony.com>
+ */
+class SessionServiceProvider extends ServiceProvider
+{
+    private $app;
+
+    public function register(Container $app)
+    {
+        $this->app = $app;
+
+        $app['session.test'] = false;
+
+        $app['session'] = function ($app) {
+            return new Session($app['session.storage']);
+        };
+
+        $app['session.storage'] = function ($app) {
+            if ($app['session.test']) {
+                return $app['session.storage.test'];
+            }
+
+            return $app['session.storage.native'];
+        };
+
+        $app['session.storage.handler'] = function ($app) {
+            return new NativeFileSessionHandler($app['session.storage.save_path']);
+        };
+
+        $app['session.storage.native'] = function ($app) {
+            return new NativeSessionStorage(
+                $app['session.storage.options'],
+                $app['session.storage.handler']
+            );
+        };
+
+        $app['session.listener'] = function ($app) {
+            return new SessionListener($app, $app['session.attribute_bag'], $app['session.flash_bag']);
+        };
+
+        $app['session.storage.test'] = function () {
+            return new MockFileSessionStorage();
+        };
+
+        $app['session.listener.test'] = function ($app) {
+            return new TestSessionListener($app);
+        };
+
+        $app['session.storage.options']   = [];
+        $app['session.default_locale']    = 'en';
+        $app['session.storage.save_path'] = null;
+        $app['session.attribute_bag']     = null;
+        $app['session.flash_bag']         = null;
+    }
+
+    public function subscribe(Container $app, EventDispatcherInterface $dispatcher)
+    {
+        $dispatcher->addSubscriber($app['session.listener']);
+
+        if ($app['session.test']) {
+            $app['dispatcher']->addSubscriber($app['session.listener.test']);
+        }
+    }
+}
