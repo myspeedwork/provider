@@ -1,10 +1,10 @@
 <?php
 
-namespace Speedwork\Core\Provider;
+namespace Speedwork\Provider;
 
 use Speedwork\Core\Container;
-use Speedwork\Core\Provider\Locale\LocaleListener;
 use Speedwork\Core\ServiceProvider;
+use Speedwork\Provider\Locale\LocaleListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**

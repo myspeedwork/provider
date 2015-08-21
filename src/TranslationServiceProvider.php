@@ -1,6 +1,6 @@
 <?php
 
-namespace Speedwork\Core\Provider;
+namespace Speedwork\Provider;
 
 use Speedwork\Core\Container;
 use Speedwork\Core\ServiceProvider;

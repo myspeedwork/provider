@@ -1,11 +1,11 @@
 <?php
 
-namespace Speedwork\Core\Provider;
+namespace Speedwork\Provider;
 
-use Silex\Provider\Session\SessionListener;
-use Silex\Provider\Session\TestSessionListener;
 use Speedwork\Core\Container;
 use Speedwork\Core\ServiceProvider;
+use Speedwork\Provider\Session\SessionListener;
+use Speedwork\Provider\Session\TestSessionListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\NativeFileSessionHandler;

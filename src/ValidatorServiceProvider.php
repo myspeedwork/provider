@@ -1,10 +1,10 @@
 <?php
 
-namespace Speedwork\Core\Provider;
+namespace Speedwork\Provider;
 
 use Speedwork\Core\Container;
-use Speedwork\Core\Provider\Validator\ConstraintValidatorFactory;
 use Speedwork\Core\ServiceProvider;
+use Speedwork\Provider\Validator\ConstraintValidatorFactory;
 use Symfony\Component\Validator\Mapping\Factory\LazyLoadingMetadataFactory;
 use Symfony\Component\Validator\Mapping\Loader\StaticMethodLoader;
 use Symfony\Component\Validator\Validation;

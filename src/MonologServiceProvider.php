@@ -1,6 +1,6 @@
 <?php
 
-namespace Speedwork\Core\Provider;
+namespace Speedwork\Provider;
 
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
