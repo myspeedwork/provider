@@ -2,8 +2,8 @@
 
 namespace Speedwork\Provider;
 
-use Speedwork\Core\Container;
-use Speedwork\Core\ServiceProvider;
+use Speedwork\Container\Container;
+use Speedwork\Container\ServiceProvider;
 use Symfony\Component\Form\Extension\Csrf\CsrfExtension;
 use Symfony\Component\Form\Extension\HttpFoundation\HttpFoundationExtension;
 use Symfony\Component\Form\Extension\Validator\ValidatorExtension as FormValidatorExtension;
@@ -18,7 +18,7 @@ use Symfony\Component\Security\Csrf\TokenStorage\SessionTokenStorage;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class FormServiceProvider implements ServiceProvider
+class FormServiceProvider extends ServiceProvider
 {
     public function register(Container $app)
     {

@@ -2,7 +2,7 @@
 
 namespace Speedwork\Provider\Session;
 
-use Speedwork\Core\Container;
+use Speedwork\Container\Container;
 use Symfony\Component\HttpKernel\EventListener\TestSessionListener as BaseTestSessionListener;
 
 /**

@@ -2,7 +2,7 @@
 
 namespace Speedwork\Core\Provider\Locale;
 
-use Speedwork\Core\Container;
+use Speedwork\Container\Container;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;

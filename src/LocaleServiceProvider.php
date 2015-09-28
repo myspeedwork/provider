@@ -2,8 +2,8 @@
 
 namespace Speedwork\Provider;
 
-use Speedwork\Core\Container;
-use Speedwork\Core\ServiceProvider;
+use Speedwork\Container\Container;
+use Speedwork\Container\ServiceProvider;
 use Speedwork\Provider\Locale\LocaleListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 

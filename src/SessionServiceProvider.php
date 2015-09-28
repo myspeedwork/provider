@@ -2,8 +2,8 @@
 
 namespace Speedwork\Provider;
 
-use Speedwork\Core\Container;
-use Speedwork\Core\ServiceProvider;
+use Speedwork\Container\Container;
+use Speedwork\Container\ServiceProvider;
 use Speedwork\Provider\Session\SessionListener;
 use Speedwork\Provider\Session\TestSessionListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -19,12 +19,8 @@ use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
  */
 class SessionServiceProvider extends ServiceProvider
 {
-    private $app;
-
     public function register(Container $app)
     {
-        $this->app = $app;
-
         $app['session.test'] = false;
 
         $app['session'] = function ($app) {

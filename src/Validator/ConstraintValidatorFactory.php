@@ -2,7 +2,7 @@
 
 namespace Speedwork\Core\Provider\Validator;
 
-use Speedwork\Core\Container;
+use Speedwork\Container\Container;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidatorFactory as BaseConstraintValidatorFactory;
 

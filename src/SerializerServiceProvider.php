@@ -2,8 +2,8 @@
 
 namespace Speedwork\Provider;
 
-use Speedwork\Core\Container;
-use Speedwork\Core\ServiceProvider;
+use Speedwork\Container\Container;
+use Speedwork\Container\ServiceProvider;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Normalizer\CustomNormalizer;

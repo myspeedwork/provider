@@ -5,8 +5,8 @@ namespace Speedwork\Provider;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-use Speedwork\Core\Container;
-use Speedwork\Core\ServiceProvider;
+use Speedwork\Container\Container;
+use Speedwork\Container\ServiceProvider;
 use Symfony\Bridge\Monolog\Handler\DebugHandler;
 
 /**

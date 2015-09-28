@@ -14,11 +14,11 @@ namespace Speedwork\Provider;
 use Cake\Core\Configure\Engine\PhpConfig;
 use Speedwork\Config\Configure;
 use Speedwork\Config\Engine\DbConfig;
+use Speedwork\Container\Container;
+use Speedwork\Container\ServiceProvider;
 use Speedwork\Core\Acl;
-use Speedwork\Core\Application;
-use Speedwork\Core\Container;
 use Speedwork\Core\Registry;
-use Speedwork\Core\ServiceProvider;
+use Speedwork\Core\Resolver;
 use Speedwork\Database\Database;
 use Speedwork\View\Template;
 
@@ -29,8 +29,8 @@ class SpeedworkServiceProvider extends ServiceProvider
 {
     public function register(Container $di)
     {
-        $di->set('application', new Application());
-        $di->get('application')->setContainer($di);
+        $di->set('resolver', new Resolver());
+        $di->get('resolver')->setContainer($di);
 
         Configure::config('system', new PhpConfig(SYS.'system'.DS.'config'.DS));
         Configure::config('default', new PhpConfig(APP.'system'.DS.'config'.DS));
@@ -73,10 +73,10 @@ class SpeedworkServiceProvider extends ServiceProvider
 
         //load white label helper
         if ($is_api_request != true && Configure::read('white_label')) {
-            $di->get('application')->helper('whitelabel')->run();
+            $di->get('resolver')->helper('whitelabel')->run();
         }
 
-        //load application configuration
+        //load app configuration
         Configure::load('config');
         if ($is_api_request != true) {
             Configure::config('db', new DbConfig($di['database']));
@@ -94,17 +94,21 @@ class SpeedworkServiceProvider extends ServiceProvider
             return $acl;
         };
 
-        $di->get('application')->setSystem(Configure::read('system_core_apps'));
+        $di->get('resolver')->setSystem(Configure::read('system_core_apps'));
 
         if ($is_api_request != true) {
             //load shortUrl helper
-            $di->get('application')->helper('router')->index();
+            $di->get('resolver')->helper('router')->index();
 
             $option = trim($_REQUEST['option']);
             $task   = trim($_REQUEST['task']);
-            $format = strtolower(trim($_REQUEST['format']));
-            $type   = strtolower(trim($_REQUEST['type']));
-            $tpl    = strtolower(trim($_REQUEST['tpl']));
+            $format = strtolower(trim($_REQUEST['_format']));
+            $type   = strtolower(trim($_REQUEST['_type']));
+            $tpl    = strtolower(trim($_REQUEST['_tpl']));
+
+            $type   = ($type) ? $type : strtolower(trim($_REQUEST['type']));
+            $format = ($format) ? $format : strtolower(trim($_REQUEST['format']));
+            $tpl    = ($tpl) ? $tpl : strtolower(trim($_REQUEST['tpl']));
 
             $option = explode('.', $option);
             $view   = $option[1];
@@ -117,9 +121,9 @@ class SpeedworkServiceProvider extends ServiceProvider
             Registry::set('option', $option);
             Registry::set('view', $view);
 
-            $di->get('application')->helper('smarty')->init();
+            $di->get('resolver')->helper('smarty')->init();
 
-            ConfigAfter();
+            require _SYS_DIR.'system'.DS.'config'.DS.'theme.php';
 
             $di['is_user_logged_in'] = $di['acl']->isUserLoggedIn() ? true : false;
 
@@ -139,7 +143,8 @@ class SpeedworkServiceProvider extends ServiceProvider
                 'baseurl'        => _URL,
                 'siteurl'        => _URL,
                 'static'         => _STATIC,
-                'imageurl'       => _IMG_URL,
+                'imageurl'       => _UPLOAD,
+                'images'         => _UPLOAD,
                 'sitename'       => _SITENAME,
                 'public'         => _PUBLIC,
                 'is_api_request' => IS_API_REQUEST,
@@ -173,8 +178,8 @@ class SpeedworkServiceProvider extends ServiceProvider
         }
 
         $di['engine']->assign('config', Configure::read());
-        //load application specific controller
-        $app = $di->get('application')->loadAppController(_APP_NAME);
+        //load resolver specific controller
+        $app = $di->get('resolver')->loadAppController(_APP_NAME);
 
         if (method_exists($app, 'afterRender')) {
             $app->{'afterRender'}();
