@@ -1,9 +1,9 @@
 <?php
 
 /**
- * This file is part of the Speedwork package.
+ * This file is part of the Speedwork framework.
  *
- * (c) 2s Technologies <info@2stechno.com>
+ * @link http://github.com/speedwork
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
