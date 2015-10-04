@@ -139,6 +139,7 @@ class SpeedworkServiceProvider extends ServiceProvider
             /=======================================================*/
             $variables = [
                 'themeimages'    => _TMP_IMG,
+                'themecss'       => _TMP_CSS,
                 'themebase'      => _TMP_URL,
                 'baseurl'        => _URL,
                 'siteurl'        => _URL,
