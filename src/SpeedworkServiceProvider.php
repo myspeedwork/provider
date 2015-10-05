@@ -21,6 +21,7 @@ use Speedwork\Core\Registry;
 use Speedwork\Core\Resolver;
 use Speedwork\Database\Database;
 use Speedwork\View\Template;
+use Speedwork\View\ViewServiceProvider;
 
 /**
  * @author sankar <sankar.suda@gmail.com>
@@ -121,7 +122,11 @@ class SpeedworkServiceProvider extends ServiceProvider
             Registry::set('option', $option);
             Registry::set('view', $view);
 
-            $di->get('resolver')->helper('smarty')->init();
+            $smarty = $di->get('resolver')->helper('smarty')->init();
+            //$di->set('engine', $smarty);
+
+            $di->set('smarty', $smarty);
+            $di->register(new ViewServiceProvider());
 
             require _SYS_DIR.'system'.DS.'config'.DS.'theme.php';
 
