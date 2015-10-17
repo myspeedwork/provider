@@ -122,10 +122,10 @@ class SpeedworkServiceProvider extends ServiceProvider
             Registry::set('option', $option);
             Registry::set('view', $view);
 
-            $smarty = $di->get('resolver')->helper('smarty')->init();
-            //$di->set('engine', $smarty);
+            $di['smarty'] = function () use ($di) {
+                return $di->get('resolver')->helper('smarty')->init();
+            };
 
-            $di->set('smarty', $smarty);
             $di->register(new ViewServiceProvider());
 
             require _SYS_DIR.'system'.DS.'config'.DS.'theme.php';
