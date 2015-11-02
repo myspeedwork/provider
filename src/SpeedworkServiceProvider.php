@@ -126,6 +126,10 @@ class SpeedworkServiceProvider extends ServiceProvider
                 return $di->get('resolver')->helper('smarty')->init();
             };
 
+            $di['twig'] = function () use ($di) {
+                return $di->get('resolver')->helper('twig')->init();
+            };
+
             $di->register(new ViewServiceProvider());
 
             require _SYS_DIR.'system'.DS.'config'.DS.'theme.php';
