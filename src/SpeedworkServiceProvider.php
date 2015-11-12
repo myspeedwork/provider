@@ -33,6 +33,8 @@ class SpeedworkServiceProvider extends ServiceProvider
         $di->set('resolver', new Resolver());
         $di->get('resolver')->setContainer($di);
 
+        $is_api_request = $di->get('is_api_request');
+
         Configure::config('system', new PhpConfig(SYS.'system'.DS.'config'.DS));
         Configure::config('default', new PhpConfig(APP.'system'.DS.'config'.DS));
         Configure::config('initial', new PhpConfig(APP));
@@ -73,13 +75,13 @@ class SpeedworkServiceProvider extends ServiceProvider
         };
 
         //load white label helper
-        if ($is_api_request != true && Configure::read('white_label')) {
+        if (!$is_api_request && Configure::read('white_label')) {
             $di->get('resolver')->helper('whitelabel')->run();
         }
 
         //load app configuration
         Configure::load('config');
-        if ($is_api_request != true) {
+        if (!$is_api_request) {
             Configure::config('db', new DbConfig($di['database']));
             Configure::load('database', 'db');
         }
@@ -97,7 +99,7 @@ class SpeedworkServiceProvider extends ServiceProvider
 
         $di->get('resolver')->setSystem(Configure::read('system_core_apps'));
 
-        if ($is_api_request != true) {
+        if (!$is_api_request) {
             //load shortUrl helper
             $di->get('resolver')->helper('router')->index();
 
@@ -124,10 +126,6 @@ class SpeedworkServiceProvider extends ServiceProvider
 
             $di['smarty'] = function () use ($di) {
                 return $di->get('resolver')->helper('smarty')->init();
-            };
-
-            $di['twig'] = function () use ($di) {
-                return $di->get('resolver')->helper('twig')->init();
             };
 
             $di->register(new ViewServiceProvider());
@@ -157,7 +155,7 @@ class SpeedworkServiceProvider extends ServiceProvider
                 'images'         => _UPLOAD,
                 'sitename'       => _SITENAME,
                 'public'         => _PUBLIC,
-                'is_api_request' => IS_API_REQUEST,
+                'is_api_request' => $is_api_request,
                 'is_cli_request' => IS_CLI_REQUEST,
                 'ip'             => ip(),
                 'option'         => $option,
@@ -178,21 +176,18 @@ class SpeedworkServiceProvider extends ServiceProvider
                 Registry::set($key, $value);
             }
 
-            $di['template'] = function ($di) {
-                $template = new Template();
-                $template->setContainer($di);
-                $template->beforeRender();
-
-                return $template;
-            };
+            $di['engine']->assign('config', Configure::read());
         }
 
-        $di['engine']->assign('config', Configure::read());
+        $di['template'] = function ($di) {
+            $template = new Template();
+            $template->setContainer($di);
+            $template->beforeRender();
+
+            return $template;
+        };
+
         //load resolver specific controller
-        $app = $di->get('resolver')->loadAppController(_APP_NAME);
-
-        if (method_exists($app, 'afterRender')) {
-            $app->{'afterRender'}();
-        }
+        $di->get('resolver')->loadAppController(_APP_NAME);
     }
 }
