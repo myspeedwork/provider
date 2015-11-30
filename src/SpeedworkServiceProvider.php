@@ -51,7 +51,7 @@ class SpeedworkServiceProvider extends ServiceProvider
 
             $connection = $database->connect($config);
             if (!$connection) {
-                if (php_sapi_name() == 'cli') {
+                if (php_sapi_name() == 'cli' || $is_api_request) {
                     echo json_encode([
                         'status'  => 'ERROR',
                         'message' => 'database was gone away',
@@ -60,7 +60,7 @@ class SpeedworkServiceProvider extends ServiceProvider
                     die;
                 } else {
                     $path = SYS.'public'.DS.'templates'.DS.'system'.DS.'databasegone.tpl';
-                    echo @file_get_contents($path);
+                    echo file_get_contents($path);
                     die('<!-- Database was gone away... -->');
                 }
             }
