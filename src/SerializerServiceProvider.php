@@ -16,7 +16,7 @@ use Symfony\Component\Serializer\Serializer;
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Marijn Huizendveld <marijn@pink-tie.com>
  */
-class SerializerServiceProvider implements ServiceProvider
+class SerializerServiceProvider extends ServiceProvider
 {
     /**
      * {@inheritdoc}

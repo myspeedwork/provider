@@ -15,7 +15,7 @@ use Symfony\Component\Validator\Validator;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class ValidatorServiceProvider implements ServiceProvider
+class ValidatorServiceProvider extends ServiceProvider
 {
     public function register(Container $app)
     {

@@ -15,7 +15,7 @@ use Symfony\Component\Translation\Translator;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class TranslationServiceProvider implements ServiceProvider
+class TranslationServiceProvider extends ServiceProvider
 {
     public function register(Container $app)
     {

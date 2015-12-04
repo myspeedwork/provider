@@ -12,7 +12,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class LocaleServiceProvider implements ServiceProvider
+class LocaleServiceProvider extends ServiceProvider
 {
     public function register(Container $app)
     {

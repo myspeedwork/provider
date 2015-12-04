@@ -14,7 +14,7 @@ use Symfony\Bridge\Monolog\Handler\DebugHandler;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class MonologServiceProvider implements ServiceProvider
+class MonologServiceProvider extends ServiceProvider
 {
     public function register(Container $app)
     {
