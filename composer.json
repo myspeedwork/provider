@@ -16,6 +16,9 @@
         "speedwork/view" : "dev-master",
         "speedwork/config" : "dev-master"
     },
+    "suggests" : {
+        "symfony/http-foundation": "~2.7|^3.0"
+    },
     "autoload" : {
         "psr-4": { "Speedwork\\Provider\\": "src" }
     },

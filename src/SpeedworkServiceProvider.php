@@ -39,7 +39,7 @@ class SpeedworkServiceProvider extends ServiceProvider
         Configure::config('default', new PhpConfig(APP.'system'.DS.'config'.DS));
         Configure::config('initial', new PhpConfig(APP));
 
-        Configure::load('config', 'system');
+        Configure::load('app', 'system');
         Configure::load('config', 'initial');
 
         $di['database'] = function ($di) {
@@ -86,8 +86,6 @@ class SpeedworkServiceProvider extends ServiceProvider
             Configure::load('database', 'db');
         }
 
-        require _SYS_DIR.'system'.DS.'config'.DS.'core.php';
-
         $di['session.storage.options'] = Configure::read('session');
 
         $di['acl'] = function ($di) {
@@ -98,6 +96,8 @@ class SpeedworkServiceProvider extends ServiceProvider
         };
 
         $di->get('resolver')->setSystem(Configure::read('system_core_apps'));
+
+        require _SYS_DIR.'system'.DS.'config'.DS.'constants.php';
 
         if (!$is_api_request) {
             //load shortUrl helper
@@ -170,7 +170,7 @@ class SpeedworkServiceProvider extends ServiceProvider
             $variables['token']             = $token;
 
             foreach ($variables as $key => $value) {
-                $di->set($key, $value);
+                $di[$key] = $value;
                 $di['engine']->assign($key, $value);
                 Configure::write($key, $value);
                 Registry::set($key, $value);

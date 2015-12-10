@@ -5,11 +5,9 @@ namespace Speedwork\Provider;
 use Speedwork\Container\Container;
 use Speedwork\Container\ServiceProvider;
 use Speedwork\Provider\Session\SessionListener;
-use Speedwork\Provider\Session\TestSessionListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\NativeFileSessionHandler;
-use Symfony\Component\HttpFoundation\Session\Storage\MockFileSessionStorage;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 
 /**
@@ -21,17 +19,11 @@ class SessionServiceProvider extends ServiceProvider
 {
     public function register(Container $app)
     {
-        $app['session.test'] = false;
-
         $app['session'] = function ($app) {
             return new Session($app['session.storage']);
         };
 
         $app['session.storage'] = function ($app) {
-            if ($app['session.test']) {
-                return $app['session.storage.test'];
-            }
-
             return $app['session.storage.native'];
         };
 
@@ -50,14 +42,6 @@ class SessionServiceProvider extends ServiceProvider
             return new SessionListener($app, $app['session.attribute_bag'], $app['session.flash_bag']);
         };
 
-        $app['session.storage.test'] = function () {
-            return new MockFileSessionStorage();
-        };
-
-        $app['session.listener.test'] = function ($app) {
-            return new TestSessionListener($app);
-        };
-
         $app['session.storage.options']   = [];
         $app['session.default_locale']    = 'en';
         $app['session.storage.save_path'] = null;
@@ -68,9 +52,5 @@ class SessionServiceProvider extends ServiceProvider
     public function subscribe(Container $app, EventDispatcherInterface $dispatcher)
     {
         $dispatcher->addSubscriber($app['session.listener']);
-
-        if ($app['session.test']) {
-            $app['dispatcher']->addSubscriber($app['session.listener.test']);
-        }
     }
 }
