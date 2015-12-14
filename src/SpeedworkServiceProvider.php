@@ -11,15 +11,11 @@
 
 namespace Speedwork\Provider;
 
-use Cake\Core\Configure\Engine\PhpConfig;
-use Speedwork\Config\Configure;
-use Speedwork\Config\Engine\DbConfig;
 use Speedwork\Container\Container;
 use Speedwork\Container\ServiceProvider;
 use Speedwork\Core\Acl;
 use Speedwork\Core\Registry;
 use Speedwork\Core\Resolver;
-use Speedwork\Database\Database;
 use Speedwork\View\Template;
 use Speedwork\View\ViewServiceProvider;
 
@@ -30,63 +26,30 @@ class SpeedworkServiceProvider extends ServiceProvider
 {
     public function register(Container $di)
     {
+        $di->register(new \Speedwork\Config\ConfigServiceProvider(), [
+            'config.paths' => [
+                APP.'system'.DS.'config'.DS,
+            ],
+        ]);
+
+        if (file_exists(APP.'.env')) {
+            $di['config.loader']->load(APP.'.env');
+        }
+
+        $di['config.loader']->load([
+            APP.'system'.DS.'config'.DS,
+        ], true);
+
+        $di->register(new \Speedwork\Filesystem\FilesystemServiceProvider());
+        $di->register(new \Speedwork\Provider\SessionServiceProvider());
+        $di->register(new \Speedwork\Database\DatabaseServiceProvider());
+
+        require SYS.'system'.DS.'config'.DS.'constants.php';
+
         $di->set('resolver', new Resolver());
         $di->get('resolver')->setContainer($di);
 
         $is_api_request = $di->get('is_api_request');
-
-        Configure::config('system', new PhpConfig(SYS.'system'.DS.'config'.DS));
-        Configure::config('default', new PhpConfig(APP.'system'.DS.'config'.DS));
-        Configure::config('initial', new PhpConfig(APP));
-
-        Configure::load('app', 'system');
-        Configure::load('config', 'initial');
-
-        $di['database'] = function ($di) {
-            $database = new Database();
-
-            $datasource = Configure::read('database.config');
-            $datasource = ($datasource) ? $datasource : 'default';
-            $config     = Configure::read('database.'.$datasource);
-
-            $connection = $database->connect($config);
-            if (!$connection) {
-                if (php_sapi_name() == 'cli' || $is_api_request) {
-                    echo json_encode([
-                        'status'  => 'ERROR',
-                        'message' => 'database was gone away',
-                        'error'   => $database->lastError(),
-                    ]);
-                    die;
-                } else {
-                    $path = SYS.'public'.DS.'templates'.DS.'system'.DS.'databasegone.tpl';
-                    echo file_get_contents($path);
-                    die('<!-- Database was gone away... -->');
-                }
-            }
-
-            $database->setContainer($di);
-
-            register_shutdown_function(function () use ($database) {
-                $database->disConnect();
-            });
-
-            return $database;
-        };
-
-        //load white label helper
-        if (!$is_api_request && Configure::read('white_label')) {
-            $di->get('resolver')->helper('whitelabel')->run();
-        }
-
-        //load app configuration
-        Configure::load('config');
-        if (!$is_api_request) {
-            Configure::config('db', new DbConfig($di['database']));
-            Configure::load('database', 'db');
-        }
-
-        $di['session.storage.options'] = Configure::read('session');
 
         $di['acl'] = function ($di) {
             $acl = new Acl();
@@ -95,20 +58,19 @@ class SpeedworkServiceProvider extends ServiceProvider
             return $acl;
         };
 
-        $di->get('resolver')->setSystem(Configure::read('system_core_apps'));
+        $di->get('resolver')->setSystem($di['config']->get('app.core_apps'));
 
-        require _SYS_DIR.'system'.DS.'config'.DS.'constants.php';
-
-        if (!$is_api_request) {
+        if ($is_api_request !== true) {
             //load shortUrl helper
             $di->get('resolver')->helper('router')->index();
 
             $option = trim($_REQUEST['option']);
-            $task   = trim($_REQUEST['task']);
+            $task   = trim($_REQUEST['_task']);
             $format = strtolower(trim($_REQUEST['_format']));
             $type   = strtolower(trim($_REQUEST['_type']));
             $tpl    = strtolower(trim($_REQUEST['_tpl']));
 
+            $task   = ($task) ? $task : trim($_REQUEST['task']);
             $type   = ($type) ? $type : strtolower(trim($_REQUEST['type']));
             $format = ($format) ? $format : strtolower(trim($_REQUEST['format']));
             $tpl    = ($tpl) ? $tpl : strtolower(trim($_REQUEST['tpl']));
@@ -121,18 +83,8 @@ class SpeedworkServiceProvider extends ServiceProvider
                 $view = trim($_REQUEST['view']);
             }
 
-            Registry::set('option', $option);
-            Registry::set('view', $view);
-
-            $di['smarty'] = function () use ($di) {
-                return $di->get('resolver')->helper('smarty')->init();
-            };
-
-            $di->register(new ViewServiceProvider());
-
-            require _SYS_DIR.'system'.DS.'config'.DS.'theme.php';
-
-            $di['is_user_logged_in'] = $di['acl']->isUserLoggedIn() ? true : false;
+            app(['option' => $option]);
+            app(['view' => $view]);
 
             $token = $di['session']->get('token');
             //Generate a key for every session
@@ -140,6 +92,16 @@ class SpeedworkServiceProvider extends ServiceProvider
                 $token = md5(uniqid());
                 $di['session']->set('token', $token);
             }
+
+            $di['smarty'] = function () use ($di) {
+                return $di->get('resolver')->helper('smarty')->init();
+            };
+
+            $di->register(new ViewServiceProvider());
+
+            require SYS.'system'.DS.'config'.DS.'theme.php';
+
+            $di['is_user_logged_in'] = $di['acl']->isUserLoggedIn() ? true : false;
 
             /*======================================================
             // DEFAULT VARABLES
@@ -157,7 +119,6 @@ class SpeedworkServiceProvider extends ServiceProvider
                 'public'         => _PUBLIC,
                 'is_api_request' => $is_api_request,
                 'is_cli_request' => IS_CLI_REQUEST,
-                'ip'             => ip(),
                 'option'         => $option,
                 'view'           => $view,
                 'task'           => $task,
@@ -172,11 +133,14 @@ class SpeedworkServiceProvider extends ServiceProvider
             foreach ($variables as $key => $value) {
                 $di[$key] = $value;
                 $di['engine']->assign($key, $value);
-                Configure::write($key, $value);
+                $di['config']->set($key, $value);
                 Registry::set($key, $value);
             }
 
-            $di['engine']->assign('config', Configure::read());
+            //printr($di['config']->all());            die;
+
+            $di['engine']->assign('flash', $di['session']->getFlashBag()->get('flash'));
+            $di['engine']->assign('config', $di['config']->all());
         }
 
         $di['template'] = function ($di) {
