@@ -79,53 +79,33 @@ class SpeedworkServiceProvider extends ServiceProvider
     protected function registerNonApi(Container $di)
     {
         $is_api_request = $di->get('is_api_request');
-        $is_app_api     = $_REQUEST['app'] ? true : false;
 
-        if ($is_api_request === true && $is_app_api === false) {
-            return true;
+        if (!$is_api_request) {
+            $di->get('resolver')->helper('router')->index();
         }
 
-        if ($is_api_request && $is_app_api) {
-            $this->registerView($di);
+        $data = $_REQUEST;
 
-            return true;
-        }
+        $option = strtolower(trim($data['option']));
+        $task   = trim($data['_task']);
+        $format = strtolower(trim($data['_format']));
+        $type   = strtolower(trim($data['_type']));
+        $tpl    = strtolower(trim($data['_tpl']));
 
-        //load router helper
-        $di->get('resolver')->helper('router')->index();
-
-        $option = trim($_REQUEST['option']);
-        $task   = trim($_REQUEST['_task']);
-        $format = strtolower(trim($_REQUEST['_format']));
-        $type   = strtolower(trim($_REQUEST['_type']));
-        $tpl    = strtolower(trim($_REQUEST['_tpl']));
-
-        $task   = $task ?: trim($_REQUEST['task']);
-        $type   = $type ?: strtolower(trim($_REQUEST['type']));
-        $format = $format ?: strtolower(trim($_REQUEST['format']));
-        $tpl    = $tpl ?: strtolower(trim($_REQUEST['tpl']));
+        $option = $option ?: trim($data['method']);
+        $task   = $task ?: trim($data['task']);
+        $type   = $type ?: strtolower(trim($data['type']));
+        $format = $format ?: strtolower(trim($data['format']));
+        $tpl    = $tpl ?: strtolower(trim($data['tpl']));
 
         $option = explode('.', $option);
-        $view   = $option[1];
+        $view   = $option[1] ?: trim($data['view']);
         $option = $option[0];
 
-        if (empty($view)) {
-            $view = trim($_REQUEST['view']);
-        }
-
-        $di['option'] = $option;
-        $di['view']   = $view;
-
-        $token = $di['session']->get('token');
-        //Generate a key for every session
-        if (!$di['is_ajax_request'] && !$token) {
-            $token = md5(uniqid());
-            $di['session']->set('token', $token);
-        }
+        $di['option'] = strtolower($option);
+        $di['view']   = strtolower($view);
 
         $this->registerView($di);
-
-        $di['is_user_logged_in'] = $di['acl']->isUserLoggedIn();
 
         /*======================================================
         // DEFAULT VARABLES
@@ -142,7 +122,6 @@ class SpeedworkServiceProvider extends ServiceProvider
             'sitename'       => _SITENAME,
             'public'         => _PUBLIC,
             'is_api_request' => $is_api_request,
-            'is_cli_request' => IS_CLI_REQUEST,
             'option'         => $option,
             'view'           => $view,
             'task'           => $task,
@@ -151,18 +130,37 @@ class SpeedworkServiceProvider extends ServiceProvider
             'tpl'            => $tpl,
         ];
 
-        $variables['is_user_logged_in'] = $di->get('is_user_logged_in');
-        $variables['token']             = $token;
+        if (!$is_api_request) {
+            //Generate a key for every session
+            $token = $di['session']->get('token');
+            if (!$token) {
+                $token = md5(uniqid());
+                $di['session']->set('token', $token);
+            }
 
-        foreach ($variables as $key => $value) {
+            $logged_in = $di['acl']->isUserLoggedIn();
+
+            $di['is_user_logged_in'] = $logged_in;
+
+            $variables['is_user_logged_in'] = $logged_in;
+            $variables['token']             = $token;
+
+            $di['engine']->assign('flash', $di['session']->getFlashBag()->get('flash'));
+        }
+
+        $this->set($di, $variables);
+
+        $di['engine']->assign('config', $di['config']->all());
+    }
+
+    protected function set(Container $di, $values = [])
+    {
+        foreach ($values as $key => $value) {
             $di[$key] = $value;
             $di['engine']->assign($key, $value);
             $di['config']->set($key, $value);
             Registry::set($key, $value);
         }
-
-        $di['engine']->assign('flash', $di['session']->getFlashBag()->get('flash'));
-        $di['engine']->assign('config', $di['config']->all());
     }
 
     protected function registerView(Container $di)
