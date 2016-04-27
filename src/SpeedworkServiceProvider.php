@@ -29,7 +29,7 @@ class SpeedworkServiceProvider extends ServiceProvider
         $this->registerConfig($di);
 
         $di->register(new \Speedwork\Filesystem\FilesystemServiceProvider());
-        $di->register(new \Speedwork\Provider\SessionServiceProvider());
+        $di->register(new \Speedwork\Provider\SessionServiceProvider(), $di['config']->get('session'));
         $di->register(new \Speedwork\Database\DatabaseServiceProvider());
 
         $di->set('resolver', new Resolver());
