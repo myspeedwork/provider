@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Speedwork package.
+ *
+ * (c) Sankar <sankar.suda@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code
+ */
+
 namespace Speedwork\Provider;
 
 use Speedwork\Container\Container;
@@ -10,9 +19,9 @@ use Whoops\Run;
 use Whoops\Util\Misc;
 
 /**
- * Symfony Translation component Provider.
+ * Php error handling Service Provider.
  *
- * @author Fabien Potencier <fabien@symfony.com>
+ * @author Sankar <sankar.suda@gmail.com>
  */
 class WhoopsServiceProvider extends ServiceProvider
 {

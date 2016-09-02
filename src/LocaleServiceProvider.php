@@ -1,16 +1,24 @@
 <?php
 
+/*
+ * This file is part of the Speedwork package.
+ *
+ * (c) Sankar <sankar.suda@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code
+ */
+
 namespace Speedwork\Provider;
 
 use Speedwork\Container\Container;
 use Speedwork\Container\ServiceProvider;
 use Speedwork\Provider\Locale\LocaleListener;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Locale Provider.
  *
- * @author Fabien Potencier <fabien@symfony.com>
+ * @author Sankar <sankar.suda@gmail.com>
  */
 class LocaleServiceProvider extends ServiceProvider
 {
@@ -21,10 +29,5 @@ class LocaleServiceProvider extends ServiceProvider
         };
 
         $app['locale'] = 'en';
-    }
-
-    public function subscribe(Container $app, EventDispatcherInterface $dispatcher)
-    {
-        $dispatcher->addSubscriber($app['locale.listener']);
     }
 }

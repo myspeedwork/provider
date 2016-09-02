@@ -1,19 +1,19 @@
 <?php
 
-/**
- * This file is part of the Speedwork framework.
+/*
+ * This file is part of the Speedwork package.
  *
- * @link http://github.com/speedwork
+ * (c) Sankar <sankar.suda@gmail.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code
  */
+
 namespace Speedwork\Provider;
 
 use Speedwork\Container\Container;
 use Speedwork\Container\ServiceProvider;
 use Speedwork\Core\Acl;
-use Speedwork\Core\Registry;
 use Speedwork\Core\Resolver;
 use Speedwork\View\Template;
 use Speedwork\View\ViewServiceProvider;
@@ -158,7 +158,6 @@ class SpeedworkServiceProvider extends ServiceProvider
             $di[$key] = $value;
             $di['engine']->assign($key, $value);
             $di['config']->set($key, $value);
-            Registry::set($key, $value);
         }
     }
 

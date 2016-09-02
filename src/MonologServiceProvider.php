@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Speedwork package.
+ *
+ * (c) Sankar <sankar.suda@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code
+ */
+
 namespace Speedwork\Provider;
 
 use Monolog\Formatter\LineFormatter;
@@ -10,9 +19,9 @@ use Speedwork\Container\ServiceProvider;
 use Symfony\Bridge\Monolog\Handler\DebugHandler;
 
 /**
- * Monolog Provider.
+ * Logger service provider.
  *
- * @author Fabien Potencier <fabien@symfony.com>
+ * @author Sankar <sankar.suda@gmail.com>
  */
 class MonologServiceProvider extends ServiceProvider
 {

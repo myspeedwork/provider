@@ -14,12 +14,16 @@
         "speedwork/core" : "dev-master",
         "speedwork/database" : "dev-master",
         "speedwork/view" : "dev-master",
-        "speedwork/config" : "dev-master",
-        "filp/whoops": "2.*"
+        "speedwork/config" : "dev-master"
+    },
+    "require-dev" : {
+        "phpunit/phpunit": "~3.7",
+        "satooshi/php-coveralls": "dev-master"
     },
     "suggests" : {
-        "symfony/http-foundation": "~2.7|^3.0",
-        "monolog/monolog": "For logging"
+        "symfony/http-foundation": "~2.7|^3.0 For session support",
+        "monolog/monolog": "For logging",
+        "filp/whoops": "2.* For php error logging",
     },
     "autoload" : {
         "psr-4": { "Speedwork\\Provider\\": "src" }
