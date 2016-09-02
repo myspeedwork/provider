@@ -23,7 +23,7 @@
     "suggests" : {
         "symfony/http-foundation": "~2.7|^3.0 For session support",
         "monolog/monolog": "For logging",
-        "filp/whoops": "2.* For php error logging",
+        "filp/whoops": "2.* For php error logging"
     },
     "autoload" : {
         "psr-4": { "Speedwork\\Provider\\": "src" }
