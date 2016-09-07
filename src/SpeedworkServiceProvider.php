@@ -17,6 +17,7 @@ use Speedwork\Core\Acl;
 use Speedwork\Core\Resolver;
 use Speedwork\View\Template;
 use Speedwork\View\ViewServiceProvider;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
  * @author sankar <sankar.suda@gmail.com>
@@ -27,13 +28,17 @@ class SpeedworkServiceProvider extends ServiceProvider
     {
         $this->registerConfig($di);
 
+        $di['dispatcher'] = function () {
+            return new EventDispatcher();
+        };
+
         $di->register(new \Speedwork\Filesystem\FilesystemServiceProvider());
         $di->register(new \Speedwork\Provider\SessionServiceProvider(), $di['config']->get('session'));
         $di->register(new \Speedwork\Database\DatabaseServiceProvider());
 
         $di->set('resolver', new Resolver());
         $di->get('resolver')->setContainer($di);
-        $di->get('resolver')->setSystem($di['config']->get('app.core_apps'));
+        $di->get('resolver')->setSystem($di['config']->get('app.apps'));
 
         $di['acl'] = function ($di) {
             $acl = new Acl();
@@ -52,6 +57,10 @@ class SpeedworkServiceProvider extends ServiceProvider
             return $template;
         };
 
+        $di['theme'] = function ($di) {
+            return $di['template'];
+        };
+
         //load resolver specific controller
         $di->get('resolver')->loadAppController(_APP_NAME);
     }
@@ -60,7 +69,7 @@ class SpeedworkServiceProvider extends ServiceProvider
     {
         $di->register(new \Speedwork\Config\ConfigServiceProvider(), [
             'config.paths' => [
-                APP.'system'.DS.'config'.DS,
+                APP.'config'.DS,
             ],
         ]);
 
@@ -69,10 +78,10 @@ class SpeedworkServiceProvider extends ServiceProvider
         }
 
         $di['config.loader']->load([
-            APP.'system'.DS.'config'.DS,
+            APP.'config'.DS,
         ], true);
 
-        require SYS.'system'.DS.'config'.DS.'constants.php';
+        require SYS.'config'.DS.'constants.php';
     }
 
     protected function registerNonApi(Container $di)
@@ -181,6 +190,6 @@ class SpeedworkServiceProvider extends ServiceProvider
 
         $di->register(new ViewServiceProvider());
 
-        require SYS.'system'.DS.'config'.DS.'theme.php';
+        require SYS.'config'.DS.'theme.php';
     }
 }
