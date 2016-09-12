@@ -10,23 +10,24 @@
         }
     ],
     "require": {
-        "php" : ">=5.4",
-        "speedwork/core" : "dev-master",
-        "speedwork/database" : "dev-master",
-        "speedwork/view" : "dev-master",
-        "speedwork/config" : "dev-master"
+        "php" : ">=5.6"
     },
     "require-dev" : {
-        "phpunit/phpunit": "~3.7",
-        "satooshi/php-coveralls": "dev-master"
+        "phpunit/phpunit": "~5.5",
+        "satooshi/php-coveralls": "2.*"
     },
-    "suggests" : {
-        "symfony/http-foundation": "~2.7|^3.0 For session support",
-        "monolog/monolog": "For logging",
-        "filp/whoops": "2.* For php error logging"
+    "suggest" : {
+        "symfony/http-foundation": "~3.0 for session support",
+        "monolog/monolog": ">=1.0.0 for logging",
+        "filp/whoops": "2.* for php error logging"
     },
     "autoload" : {
         "psr-4": { "Speedwork\\Provider\\": "src" }
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
 }

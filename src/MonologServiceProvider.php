@@ -12,11 +12,13 @@
 namespace Speedwork\Provider;
 
 use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\ErrorLogHandler;
+use Monolog\Handler\RotatingFileHandler;
 use Monolog\Handler\StreamHandler;
+use Monolog\Handler\SyslogHandler;
 use Monolog\Logger;
 use Speedwork\Container\Container;
 use Speedwork\Container\ServiceProvider;
-use Symfony\Bridge\Monolog\Handler\DebugHandler;
 
 /**
  * Logger service provider.
@@ -31,52 +33,58 @@ class MonologServiceProvider extends ServiceProvider
             return $app['monolog'];
         };
 
-        if ($bridge = class_exists('Symfony\Bridge\Monolog\Logger')) {
-            $app['monolog.handler.debug'] = function () use ($app) {
-                $level = MonologServiceProvider::translateLevel($app['monolog.level']);
-
-                return new DebugHandler($level);
-            };
-        }
-
-        $app['monolog.logger.class'] = $bridge ? 'Symfony\Bridge\Monolog\Logger' : 'Monolog\Logger';
-
         $app['monolog'] = function ($app) {
-            $log = new $app['monolog.logger.class']($app['monolog.name']);
+            $logger = new Logger($app['monolog.name']);
 
-            $log->pushHandler($app['monolog.handler']);
+            $rotate = $app['config']->get('app.log.rotate', 'single');
+            $logger->pushHandler($app['monolog.handler.'.$rotate]);
 
-            if (isset($app['debug']) && $app['debug'] && isset($app['monolog.handler.debug'])) {
-                $log->pushHandler($app['monolog.handler.debug']);
-            }
-
-            return $log;
+            return $logger;
         };
 
         $app['monolog.formatter'] = function () {
             return new LineFormatter();
         };
 
-        $app['monolog.handler'] = function () use ($app) {
-            $level = MonologServiceProvider::translateLevel($app['monolog.level']);
-
-            $handler = new StreamHandler($app['monolog.logfile'], $level, $app['monolog.bubble'], $app['monolog.permission']);
+        $app['monolog.handler.single'] = function ($app) {
+            $handler = new StreamHandler($app['monolog.logfile'], $app['monolog.level']);
             $handler->setFormatter($app['monolog.formatter']);
 
             return $handler;
         };
 
-        $app['monolog.level'] = function () {
-            return Logger::DEBUG;
+        $app['monolog.handler.daily'] = function ($app) {
+            $maxFiles = $app['config']->get('app.log.max_files', 5);
+            $handler  = new RotatingFileHandler($app['monolog.logfile'], $maxFiles, $app['monolog.level']);
+            $handler->setFormatter($app['monolog.formatter']);
+
+            return $handler;
         };
 
-        $app['monolog.name']                    = 'myapp';
-        $app['monolog.bubble']                  = true;
-        $app['monolog.permission']              = null;
-        $app['monolog.exception.logger_filter'] = null;
+        $app['monolog.handler.error'] = function ($app) {
+            $handler = new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $app['monolog.level']);
+            $handler->setFormatter($app['monolog.formatter']);
+
+            return $handler;
+        };
+
+        $app['monolog.handler.syslog'] = function ($app) {
+            $handler = new SyslogHandler($app['monolog.name'], LOG_USER, $app['monolog.level']);
+            $handler->setFormatter($app['monolog.formatter']);
+
+            return $handler;
+        };
+
+        $level                = $app['config']->get('app.log.level', 'debug');
+        $app['monolog.level'] = $this->parseLevel($level);
+
+        $path = $app['config']->get('paths.logs');
+
+        $app['monolog.logfile'] = $path.$this->getSettings('app.log.logfile');
+        $app['monolog.name']    = $this->getSettings('monolog.name', 'app.name');
     }
 
-    public static function translateLevel($name)
+    public function parseLevel($name)
     {
         // level is already translated to logger constant, return as-is
         if (is_int($name)) {

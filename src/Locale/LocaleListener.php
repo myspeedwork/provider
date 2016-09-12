@@ -28,7 +28,6 @@ use Symfony\Component\Routing\RequestContext;
  */
 class LocaleListener implements EventSubscriberInterface
 {
-    private $app;
     private $defaultLocale;
     private $requestStack;
     private $requestContext;
