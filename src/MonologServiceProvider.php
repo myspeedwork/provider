@@ -75,12 +75,9 @@ class MonologServiceProvider extends ServiceProvider
             return $handler;
         };
 
-        $level                = $app['config']->get('app.log.level', 'debug');
-        $app['monolog.level'] = $this->parseLevel($level);
-
-        $path = $app['config']->get('paths.logs');
-
-        $app['monolog.logfile'] = $path.$this->getSettings('app.log.logfile');
+        $level                  = $app['config']->get('app.log.level', 'debug');
+        $app['monolog.level']   = $this->parseLevel($level);
+        $app['monolog.logfile'] = $app['path.logs'].$this->getSettings('app.log.logfile');
         $app['monolog.name']    = $this->getSettings('monolog.name', 'app.name');
     }
 

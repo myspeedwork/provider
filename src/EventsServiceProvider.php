@@ -13,21 +13,19 @@ namespace Speedwork\Provider;
 
 use Speedwork\Container\Container;
 use Speedwork\Container\ServiceProvider;
-use Speedwork\Provider\Locale\LocaleListener;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
- * Locale Provider.
+ * Event Service Provider.
  *
  * @author Sankar <sankar.suda@gmail.com>
  */
-class LocaleServiceProvider extends ServiceProvider
+class EventsServiceProvider extends ServiceProvider
 {
     public function register(Container $app)
     {
-        $app['locale.listener'] = function ($app) {
-            return new LocaleListener($app, $app['locale'], $app['request_stack'], isset($app['request_context']) ? $app['request_context'] : null);
+        $app['events'] = function () {
+            return new EventDispatcher();
         };
-
-        $app['locale'] = 'en';
     }
 }

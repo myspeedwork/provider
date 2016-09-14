@@ -9,7 +9,7 @@
  * file that was distributed with this source code
  */
 
-namespace Speedwork\Core\Provider\Validator;
+namespace Speedwork\Provider\Validator;
 
 use Speedwork\Container\Container;
 use Symfony\Component\Validator\Constraint;

@@ -13,8 +13,7 @@ namespace Speedwork\Provider;
 
 use Speedwork\Container\Container;
 use Speedwork\Container\ServiceProvider;
-use Speedwork\Provider\Session\SessionListener;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Speedwork\Provider\Events\SessionListener;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\Handler\NativeFileSessionHandler;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
@@ -22,7 +21,7 @@ use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 /**
  * Symfony HttpFoundation component Provider for sessions.
  *
- * @author Fabien Potencier <fabien@symfony.com>
+ * @author sankar <sankar.suda@gmail.com>
  */
 class SessionServiceProvider extends ServiceProvider
 {
@@ -56,10 +55,5 @@ class SessionServiceProvider extends ServiceProvider
         $app['session.storage.save_path'] = null;
         $app['session.attribute_bag']     = null;
         $app['session.flash_bag']         = null;
-    }
-
-    public function subscribe(Container $app, EventDispatcherInterface $dispatcher)
-    {
-        $dispatcher->addSubscriber($app['session.listener']);
     }
 }
