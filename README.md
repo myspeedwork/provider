@@ -9,3 +9,14 @@
 [![Total Downloads](https://poser.pugx.org/speedwork/provider/downloads)](https://packagist.org/packages/speedwork/provider)
 [![Build status](https://ci.appveyor.com/api/projects/status/10aw52t4ga4kek27?svg=true)](https://ci.appveyor.com/project/2stech/provider)
 [![Build Status](https://travis-ci.org/speedwork/provider.svg?branch=master)](https://travis-ci.org/speedwork/provider)
+
+Contributing
+------------
+
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Make your changes
+4. Run the tests, adding new ones for your own code if necessary (`phpunit`)
+5. Commit your changes (`git commit -am 'Added some feature'`)
+6. Push to the branch (`git push origin my-new-feature`)
+7. Create new Pull Request
