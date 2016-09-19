@@ -71,7 +71,8 @@ class BootstrapServiceProvider extends ServiceProvider
     protected function setUpPaths(Container $app)
     {
         $paths = $app->getPath();
-        $app['config']->set('path', $paths);
+
+        $app['config']->set($paths);
 
         return $paths;
     }
