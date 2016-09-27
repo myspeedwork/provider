@@ -25,9 +25,12 @@ class SpeedworkServiceProvider extends ServiceProvider
 {
     public function register(Container $app)
     {
-        $app->set('resolver', new Resolver());
-        $app->get('resolver')->setContainer($app);
-        $app->get('resolver')->setSystem($app['config']->get('app.apps'));
+        $app['resolver'] = function ($app) {
+            $resolver = new Resolver();
+            $resolver->setContainer($app);
+
+            return $resolver;
+        };
 
         $app['acl'] = function ($app) {
             $acl = new Acl();
@@ -56,9 +59,6 @@ class SpeedworkServiceProvider extends ServiceProvider
         $app['theme'] = function ($app) {
             return $app['template'];
         };
-
-        $app_name = $app['config']->get('app.app_name', 'app');
-        $app->get('resolver')->loadAppController($app_name);
     }
 
     protected function registerNonApi(Container $app)
@@ -67,19 +67,20 @@ class SpeedworkServiceProvider extends ServiceProvider
 
         $data = $_REQUEST;
 
-        $task   = $data['_task'] ? trim($data['_task']) : trim($data['task']);
+        $_task  = $data['_task'] ? trim($data['_task']) : trim($data['task']);
         $type   = $data['_type'] ? strtolower(trim($data['_layout'])) : strtolower(trim($data['type']));
         $format = $data['_format'] ? strtolower(trim($data['_format'])) : strtolower(trim($data['format']));
         $layout = $data['_layout'] ? strtolower(trim($data['_layout'])) : strtolower(trim($data['layout']));
-
         $option = $data['option'] ? strtolower(trim($data['option'])) : trim($data['method']);
 
-        list($option, $view) = explode('.', $option);
+        list($option, $view, $task) = explode('.', $option);
 
+        $task          = $task ?: $_task;
         $view          = $view ?: trim($data['view']);
         $app['option'] = strtolower($option);
         $app['view']   = strtolower($view);
         $app['route']  = trim($option.'.'.$view);
+        $app['rule']   = trim($option.'.'.$view.'.'.$task);
 
         $this->registerView($app);
 
@@ -142,16 +143,15 @@ class SpeedworkServiceProvider extends ServiceProvider
         $user   = $app['user'];
         $themes = $this->userLevelTheme($user, $themes);
 
-        if (!isset($themes[$deviceType])) {
+        if (!empty($themes[$deviceType])) {
             $deviceType = 'computer';
         }
-        $theme  = $themes[$deviceType];
-        $option = $app['option'];
-        $view   = $app['view'];
+        $theme = $themes[$deviceType];
+
+        list($option, $view) = explode('.', $app['route']);
 
         $matches = [
             $option.':'.$view,
-            $option.':'.$view.':*',
             $option.':*',
             'default',
         ];
@@ -178,22 +178,20 @@ class SpeedworkServiceProvider extends ServiceProvider
             }
         }
 
-        list($theme, $theme_id, $theme_view) = explode(':', $template);
+        list($theme, $layout, $id) = explode('.', $template);
 
-        defined('_THEMEVIEW') or define('_THEMEVIEW', $theme_view);
         defined('_THEME') or define('_THEME', _THEMES.$theme.'/');
         defined('THEME') or define('THEME', THEMES.$theme.DS);
 
         $app['config']->set('view.theme.name', $theme);
-        $app['config']->set('view.theme.id', $theme_id);
-        $app['config']->set('view.theme.view', $theme_view);
+        $app['config']->set('view.theme.id', $id);
+        $app['config']->set('view.theme.layout', $layout);
 
-        $app['config']->set('path.themebase', THEME);
-        $app['path.themesbase'] = THEME;
+        $app['config']->set('path.theme', THEME);
+        $app['path.theme'] = THEME;
 
-        $app['config']->set('location.themebase', _THEME);
-        $app['location.themesbase'] = _THEME;
-        $app['themebase']           = _THEME;
+        $app['config']->set('location.theme', _THEME);
+        $app['location.theme'] = _THEME;
     }
 
     protected function userLevelTheme($user, $themes = [])

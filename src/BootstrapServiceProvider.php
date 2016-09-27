@@ -39,7 +39,7 @@ class BootstrapServiceProvider extends ServiceProvider
         // First we will see if we have a cache configuration file. If we do, we'll load
         // the configuration items from that file so that it is very quick. Otherwise
         // we will need to spin through every configuration file and load them all.
-        if (file_exists($cached = APP.'storage/cache/config.php')) {
+        if (file_exists($cached = $app->getPath('path.cache').'config.php')) {
             $items = include $cached;
 
             $app['config']->set($items);
@@ -80,15 +80,18 @@ class BootstrapServiceProvider extends ServiceProvider
     protected function setUpLocations(Container $app)
     {
         $locations = [
-            'baseurl'  => _URL,
-            'siteurl'  => _URL,
-            'url'      => _URL,
-            'public'   => _URL.'public/',
-            'static'   => _URL.'public/static/',
-            'imageurl' => _URL.'public/uploads/',
-            'images'   => _URL.'public/uploads',
-            'cache'    => _URL.'public/cache/',
-            'media'    => _URL.'public/media/',
+            'baseurl' => _URL,
+            'siteurl' => _URL,
+            'url'     => _URL,
+            'public'  => _URL.'public/',
+            'static'  => _URL.'public/static/',
+            'cache'   => _URL.'public/cache/',
+            'images'  => _URL.'public/uploads/',
+            'upload'  => _URL.'public/uploads/',
+            'media'   => _URL.'public/uploads/media/',
+            'users'   => _URL.'public/uploads/users/',
+            'themes'  => _URL.'public/themes/',
+            'email'   => _URL.'public/email/',
         ];
 
         $app['config']->set('location', $locations);
@@ -104,7 +107,10 @@ class BootstrapServiceProvider extends ServiceProvider
     {
         $ssl = false;
 
-        if (env('HTTPS') == 'on' || env('HTTPS') == '1' || env('SERVER_PORT') == 443) {
+        if (env('HTTPS') == 'on'
+            || env('HTTPS') == '1'
+            || env('SERVER_PORT') == 443
+            || env('HTTP_X_FORWARDED_PORT') == 443) {
             $ssl = true;
         }
 
@@ -137,14 +143,12 @@ class BootstrapServiceProvider extends ServiceProvider
 
     protected function setUpConstants(Container $app)
     {
-        define('_SYS', SYS.'system'.DS);
         define('_SITENAME', $app['config']->get('app.name'));
         define('_ADMIN_MAIL', $app['config']->get('app.email'));
 
         /*========================================================
                         SOME GLOBAL DEFINATIONS
         /*********************************************************/
-        define('_SYSTEM', _URL.'system/');
         defined('_PUBLIC') or define('_PUBLIC', _URL.'public/');
         defined('_STATIC') or define('_STATIC', _PUBLIC.'static/');
         defined('_UPLOAD') or define('_UPLOAD', _PUBLIC.'uploads/');
