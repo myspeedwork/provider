@@ -11,6 +11,7 @@
 
 namespace Speedwork\Provider;
 
+use Speedwork\Container\BootableInterface;
 use Speedwork\Container\Container;
 use Speedwork\Container\ServiceProvider;
 use Speedwork\Core\Acl;
@@ -21,7 +22,7 @@ use Speedwork\View\ViewServiceProvider;
 /**
  * @author sankar <sankar.suda@gmail.com>
  */
-class SpeedworkServiceProvider extends ServiceProvider
+class SpeedworkServiceProvider extends ServiceProvider implements BootableInterface
 {
     public function register(Container $app)
     {
@@ -45,8 +46,12 @@ class SpeedworkServiceProvider extends ServiceProvider
 
         if (!$app->get('is_api_request')) {
             $app->register(new SessionServiceProvider(), $app['config']->get('session'));
-            $this->registerNonApi($app);
         }
+    }
+
+    public function boot(Container $app)
+    {
+        $this->registerNonApi($app);
 
         $app['template'] = function ($app) {
             $template = new Template();

@@ -156,7 +156,9 @@ class BootstrapServiceProvider extends ServiceProvider
         defined('_MEDIA') or define('_MEDIA', _UPLOAD.'/media/');
         defined('_THEMES') or define('_THEMES', _PUBLIC.'themes/');
 
-        define('SYSTEM', APP.'system'.DS);
+        $name = strtolower(rtrim($app->getNameSpace(), '\\'));
+
+        define('SYSTEM', APP.$name.DS);
         defined('PUBLICD') or define('PUBLICD', APP.'public'.DS);
         defined('UPLOAD') or define('UPLOAD', PUBLICD.'uploads'.DS);
         defined('IMAGES') or define('IMAGES', UPLOAD);
