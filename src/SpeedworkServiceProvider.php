@@ -51,6 +51,10 @@ class SpeedworkServiceProvider extends ServiceProvider implements BootableInterf
 
     public function boot(Container $app)
     {
+        if ($app->isConsole()) {
+            return true;
+        }
+
         $this->registerNonApi($app);
 
         $app['template'] = function ($app) {
@@ -113,9 +117,9 @@ class SpeedworkServiceProvider extends ServiceProvider implements BootableInterf
         ];
 
         $locations = $app['config']->get('location');
+        $app['view.engine']->assign('location', $locations);
 
         $this->set($app, $variables);
-        $this->set($app, $locations);
     }
 
     protected function set(Container $app, $values = [])
@@ -197,6 +201,7 @@ class SpeedworkServiceProvider extends ServiceProvider implements BootableInterf
 
         $app['config']->set('location.theme', _THEME);
         $app['location.theme'] = _THEME;
+        $app['view.engine']->assign('theme', _THEME);
     }
 
     protected function userLevelTheme($user, $themes = [])

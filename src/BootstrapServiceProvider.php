@@ -33,13 +33,13 @@ class BootstrapServiceProvider extends ServiceProvider
     protected function loadConfiguration(Container $app)
     {
         $app->register(new ConfigServiceProvider(), [
-            'config.paths' => [$app->getPath('path.config')],
+            'config.paths' => [$app->getPath('config')],
         ]);
 
         // First we will see if we have a cache configuration file. If we do, we'll load
         // the configuration items from that file so that it is very quick. Otherwise
         // we will need to spin through every configuration file and load them all.
-        if (file_exists($cached = $app->getPath('path.cache').'config.php')) {
+        if (file_exists($cached = $app->getPath('cache').'config.php')) {
             $items = include $cached;
 
             $app['config']->set($items);
@@ -47,11 +47,11 @@ class BootstrapServiceProvider extends ServiceProvider
             return true;
         }
 
-        if (file_exists($app->getPath('path.env'))) {
-            $app['config.loader']->load($app->getPath('path.env'));
+        if (file_exists($app->getPath('env'))) {
+            $app['config.loader']->load($app->getPath('env'));
         }
 
-        $app['config.loader']->load([$app->getPath('path.config')], true);
+        $app['config.loader']->load([$app->getPath('config')], true);
     }
 
     protected function setTimeZone($timezone)
@@ -85,6 +85,7 @@ class BootstrapServiceProvider extends ServiceProvider
             'url'     => _URL,
             'public'  => _URL.'public/',
             'static'  => _URL.'public/static/',
+            'assets'  => _URL.'public/assets/',
             'cache'   => _URL.'public/cache/',
             'images'  => _URL.'public/uploads/',
             'upload'  => _URL.'public/uploads/',
@@ -94,11 +95,11 @@ class BootstrapServiceProvider extends ServiceProvider
             'email'   => _URL.'public/email/',
         ];
 
-        $app['config']->set('location', $locations);
-
         foreach ($locations as $key => $value) {
             $app['location.'.$key] = $value;
         }
+
+        $app['config']->set(['location' => $locations]);
 
         return $locations;
     }
