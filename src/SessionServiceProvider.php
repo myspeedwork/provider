@@ -47,11 +47,17 @@ class SessionServiceProvider extends ServiceProvider
         };
 
         $app['session.listener'] = function ($app) {
-            return new SessionListener($app, $app['session.attribute_bag'], $app['session.flash_bag']);
+            return new SessionListener(
+                $app,
+                $app['session.attribute_bag'],
+                $app['session.flash_bag']
+            );
         };
 
-        $app['session.storage.options']   = [];
-        $app['session.default_locale']    = 'en';
+        $config = $app['config']->get('session');
+
+        $app['session.storage.options']   = $config['options'];
+        $app['session.default_locale']    = $config['locale'];
         $app['session.storage.save_path'] = null;
         $app['session.attribute_bag']     = null;
         $app['session.flash_bag']         = null;

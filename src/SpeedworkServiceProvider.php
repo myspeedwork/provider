@@ -40,23 +40,6 @@ class SpeedworkServiceProvider extends ServiceProvider implements BootableInterf
             return $acl;
         };
 
-        if ($app->isConsole()) {
-            return true;
-        }
-
-        if (!$app->get('is_api_request')) {
-            $app->register(new SessionServiceProvider(), $app['config']->get('session'));
-        }
-    }
-
-    public function boot(Container $app)
-    {
-        if ($app->isConsole()) {
-            return true;
-        }
-
-        $this->registerNonApi($app);
-
         $app['template'] = function ($app) {
             $template = new Template();
             $template->setContainer($app);
@@ -68,13 +51,30 @@ class SpeedworkServiceProvider extends ServiceProvider implements BootableInterf
         $app['theme'] = function ($app) {
             return $app['template'];
         };
+
+        if ($app->isConsole()) {
+            return true;
+        }
+
+        if (!$app->get('is_api_request')) {
+            $app->register(new SessionServiceProvider());
+        }
+    }
+
+    public function boot(Container $app)
+    {
+        if ($app->isConsole()) {
+            return true;
+        }
+
+        $this->registerNonApi($app);
     }
 
     protected function registerNonApi(Container $app)
     {
         $app['resolver']->helper('router')->index();
 
-        $data = $_REQUEST;
+        $data = $app['request']->input();
 
         $_task  = $data['_task'] ? trim($data['_task']) : trim($data['task']);
         $type   = $data['_type'] ? strtolower(trim($data['_layout'])) : strtolower(trim($data['type']));
@@ -93,15 +93,7 @@ class SpeedworkServiceProvider extends ServiceProvider implements BootableInterf
 
         $this->registerView($app);
 
-        //Generate a key for every session
-        $token = $app['session']->get('token');
-        if (!$token) {
-            $token = md5(uniqid());
-            $app['session']->set('token', $token);
-        }
-
         $is_logged_in = $app['acl']->isUserLoggedIn();
-        $app['view.engine']->assign('flash', $app['session']->getFlashBag()->get('flash'));
 
         $variables = [
             'is_api_request'    => false,
@@ -112,12 +104,8 @@ class SpeedworkServiceProvider extends ServiceProvider implements BootableInterf
             'type'              => $type,
             'layout'            => $layout,
             'sitename'          => _SITENAME,
-            'token'             => $token,
             'is_user_logged_in' => $is_logged_in,
         ];
-
-        $locations = $app['config']->get('location');
-        $app['view.engine']->assign('location', $locations);
 
         $this->set($app, $variables);
     }
@@ -135,6 +123,11 @@ class SpeedworkServiceProvider extends ServiceProvider implements BootableInterf
         $app->register(new ViewServiceProvider());
 
         $this->setUpTheme($app);
+
+        $app['view.engine']->assign('flash', $app['session']->getFlashBag()->get('flash'));
+
+        $locations = $app['config']->get('location');
+        $app['view.engine']->assign('location', $locations);
     }
 
     protected function setUpTheme(Container $app)
