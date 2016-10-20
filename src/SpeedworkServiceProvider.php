@@ -68,13 +68,13 @@ class SpeedworkServiceProvider extends ServiceProvider implements BootableInterf
             return true;
         }
 
-        $this->registerNonApi($app);
-
         $router = $app['resolver']->helper('router');
         Router::addRewrite($router);
         $values = Router::route();
 
         $app['request']->addInput($values);
+
+        $this->registerNonApi($app);
     }
 
     protected function registerNonApi(Container $app)
