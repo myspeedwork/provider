@@ -16,6 +16,7 @@ use Speedwork\Container\Container;
 use Speedwork\Container\ServiceProvider;
 use Speedwork\Core\Acl;
 use Speedwork\Core\Resolver;
+use Speedwork\Core\Router;
 use Speedwork\View\Template;
 use Speedwork\View\ViewServiceProvider;
 
@@ -68,12 +69,16 @@ class SpeedworkServiceProvider extends ServiceProvider implements BootableInterf
         }
 
         $this->registerNonApi($app);
+
+        $router = $app['resolver']->helper('router');
+        Router::addRewrite($router);
+        $values = Router::route();
+
+        $app['request']->addInput($values);
     }
 
     protected function registerNonApi(Container $app)
     {
-        $app['resolver']->helper('router')->index();
-
         $data = $app['request']->input();
 
         $_task  = $data['_task'] ? trim($data['_task']) : trim($data['task']);
