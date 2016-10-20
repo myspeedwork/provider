@@ -63,7 +63,7 @@ class SpeedworkServiceProvider extends ServiceProvider implements BootableInterf
 
     public function boot(Container $app)
     {
-        if ($app->isConsole()) {
+        if ($app->isConsole() || $app->isApi()) {
             return true;
         }
 
@@ -92,11 +92,9 @@ class SpeedworkServiceProvider extends ServiceProvider implements BootableInterf
         $app['rule']   = trim($option.'.'.$view.'.'.$task);
 
         $this->registerView($app);
-
         $is_logged_in = $app['acl']->isUserLoggedIn();
 
         $variables = [
-            'is_api_request'    => false,
             'option'            => $option,
             'view'              => $view,
             'task'              => $task,

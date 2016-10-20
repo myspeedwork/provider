@@ -27,6 +27,10 @@ class WhoopsServiceProvider extends ServiceProvider
 {
     public function register(Container $app)
     {
+        if (!$app['config']->get('app.debug')) {
+            return false;
+        }
+
         $run     = new Run();
         $handler = new PrettyPageHandler();
 
