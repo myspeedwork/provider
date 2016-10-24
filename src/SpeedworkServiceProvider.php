@@ -185,8 +185,8 @@ class SpeedworkServiceProvider extends ServiceProvider implements BootableInterf
 
         list($theme, $layout, $id) = explode('.', $template);
 
-        defined('_THEME') or define('_THEME', _THEMES.$theme.'/');
-        defined('THEME') or define('THEME', THEMES.$theme.DS);
+        defined('_THEME') or define('_THEME', $app['location.themes'].$theme.'/');
+        defined('THEME') or define('THEME', $app['path.themes'].$theme.DS);
 
         $app['config']->set('view.theme.name', $theme);
         $app['config']->set('view.theme.id', $id);

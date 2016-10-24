@@ -57,9 +57,10 @@ class BootstrapServiceProvider extends ServiceProvider
     protected function setTimeZone($timezone)
     {
         if ($timezone) {
-            if (is_numeric($timezone)) {
-                $offset   = explode('.', $timezone);
-                $offset   = $offset[0].'.'.round(($offset[1] / 60) * 100);
+            if (strpos($timezone, '.') !== false) {
+                list($hours, $minutes) = explode('.', $timezone);
+
+                $offset   = $hours.'.'.round(($minutes / 60) * 100);
                 $timezone = timezone_name_from_abbr('', $offset * 3600, 0);
             }
             if ($timezone) {
@@ -79,20 +80,29 @@ class BootstrapServiceProvider extends ServiceProvider
 
     protected function setUpLocations(Container $app)
     {
+        $url    = $app['config']->get('app.url');
+        $public = $app['config']->get('app.public');
+
+        if ($public !== false) {
+            $public = $url;
+        } else {
+            $public = $url.'public/';
+        }
+
         $locations = [
-            'baseurl' => _URL,
-            'siteurl' => _URL,
-            'url'     => _URL,
-            'public'  => _URL.'public/',
-            'static'  => _URL.'public/static/',
-            'assets'  => _URL.'public/assets/',
-            'cache'   => _URL.'public/cache/',
-            'images'  => _URL.'public/uploads/',
-            'upload'  => _URL.'public/uploads/',
-            'media'   => _URL.'public/uploads/media/',
-            'users'   => _URL.'public/uploads/users/',
-            'themes'  => _URL.'public/themes/',
-            'email'   => _URL.'public/email/',
+            'baseurl' => $url,
+            'siteurl' => $url,
+            'url'     => $url,
+            'public'  => $public,
+            'static'  => $public.'static/',
+            'assets'  => $public.'assets/',
+            'cache'   => $public.'cache/',
+            'images'  => $public.'uploads/',
+            'upload'  => $public.'uploads/',
+            'media'   => $public.'uploads/media/',
+            'users'   => $public.'uploads/users/',
+            'themes'  => $public.'themes/',
+            'email'   => $public.'email/',
         ];
 
         foreach ($locations as $key => $value) {
@@ -106,30 +116,22 @@ class BootstrapServiceProvider extends ServiceProvider
 
     protected function setUpUrl(Container $app)
     {
-        $ssl = false;
-
         if (env('HTTPS') == 'on'
             || env('HTTPS') == '1'
             || env('SERVER_PORT') == 443
             || env('HTTP_X_FORWARDED_PORT') == 443) {
-            $ssl = true;
+            $app['config']->set('app.ssl', true);
         }
 
-        $app['config']->set('app.ssl', $ssl);
+        $ssl = $app['config']->get('app.ssl');
+        $url = $app['config']->get('app.url');
 
-        $base = '/';
-        $url  = $app['config']->get('app.url');
         if (empty($url) && !defined('_URL')) {
-            if (substr(PHP_SAPI, 0, 3) == 'cli') {
+            if ($app->isConsole()) {
                 $url = $app['config']->get('app.cliurl');
             } else {
-                $url  = 'http://'.env('HTTP_HOST');
-                $url  = rtrim($url, '/').'/';
-                $base = str_replace(
-                    str_replace('\\', '/', env('DOCUMENT_ROOT')), '',
-                    str_replace('\\', '/', APP)
-                );
-                $url .= $base;
+                $url = 'http://'.env('HTTP_HOST');
+                $url = rtrim($url, '/').'/';
             }
         }
 
@@ -139,6 +141,7 @@ class BootstrapServiceProvider extends ServiceProvider
             $url = str_replace('http://', 'https://', $url);
         }
 
+        $app['config']->set('app.url', $url);
         defined('_URL') or define('_URL', $url);
     }
 
@@ -150,13 +153,6 @@ class BootstrapServiceProvider extends ServiceProvider
         /*========================================================
                         SOME GLOBAL DEFINATIONS
         /*********************************************************/
-        defined('_PUBLIC') or define('_PUBLIC', _URL.'public/');
-        defined('_STATIC') or define('_STATIC', _PUBLIC.'static/');
-        defined('_UPLOAD') or define('_UPLOAD', _PUBLIC.'uploads/');
-        defined('_IMAGES') or define('_IMAGES', _UPLOAD);
-        defined('_MEDIA') or define('_MEDIA', _UPLOAD.'/media/');
-        defined('_THEMES') or define('_THEMES', _PUBLIC.'themes/');
-
         $name = strtolower(rtrim($app->getNameSpace(), '\\'));
 
         define('SYSTEM', APP.$name.DS);
@@ -174,7 +170,7 @@ class BootstrapServiceProvider extends ServiceProvider
         /*========================================================
                         COOKIE SETTINGS
         /*********************************************************/
-        define('COOKIE_SUFX', md5(config('session.cookie_domain')));
+        define('COOKIE_SUFX', md5($app['config']->get('session.options.cookie_domain')));
         define('COOKIE_PATH', preg_replace('|https?://[^/]+|i', '', _URL));
         define('COOKIE_NAME', 'NAME_'.COOKIE_SUFX);
         define('COOKIE_KEY', 'KEY_'.COOKIE_SUFX);
